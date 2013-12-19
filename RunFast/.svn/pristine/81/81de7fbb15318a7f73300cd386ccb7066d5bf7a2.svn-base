@@ -1,0 +1,7 @@
+key: value
+minClaimSize: 3
+bounds: 4
+tntBounds: 10
+maxSizeIncrement: 4
+maxNumClaims: 3
+

@@ -1,0 +1,3 @@
+name: RunFast
+main: dan.woodward.plugin.RunFast
+version: 1.0.0

@@ -1,0 +1,44 @@
+package dan.woodward.plugin;
+
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class RunFast extends JavaPlugin implements Listener {
+	
+	float speed = 0.35F;
+	
+	@Override
+	public void onEnable(){
+		getServer().getPluginManager().registerEvents(this, this);
+	}
+
+	@Override
+	public void onDisable() {
+
+	}
+
+	@EventHandler
+	public void onRun(PlayerToggleSprintEvent event) {
+			if (event.getPlayer().isSprinting()) {
+				event.getPlayer().setWalkSpeed(0.2F);
+			} else {
+				event.getPlayer().setWalkSpeed(speed);
+			}
+		}
+	
+	@EventHandler
+	public void onPlayerLogin(PlayerLoginEvent event) {
+		String player = event.getPlayer().getName();
+		getLogger().info(player + " logged in");
+	}
+
+	@EventHandler
+	public void onPlayerLogout(PlayerQuitEvent event) {
+		String player = event.getPlayer().getName();
+		getLogger().info(player + " logged out");
+	}
+}

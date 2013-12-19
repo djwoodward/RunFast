@@ -1,0 +1,125 @@
+package dan.woodward.plugin;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.entity.Boat;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.vehicle.VehicleCreateEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class RunFast extends JavaPlugin implements Listener {
+
+    float speed_slow = 0.05F;
+    float speed_normal = 0.2F;
+    float speed_fast = 0.3F;
+    float speed_faster = 0.4F;
+    float speed_fastest = 0.5F;
+    float speed_insane = 0.6F;
+    float speed_ludicrous = 0.95F;
+
+    private final Map<Player, Float> playerSpeedCache = new HashMap<>();
+
+    @SuppressWarnings("serial")
+    private final Map<String, Float> speeds = new HashMap<String, Float>() {{
+        put("slow", speed_slow);
+        put("normal", speed_normal);
+        put("fast", speed_fast);
+        put("faster", speed_faster);
+        put("fastest", speed_fastest);
+        put("insane", speed_insane);
+        put("ludicrous", speed_ludicrous);
+    }};
+
+    @Override
+    public void onEnable(){
+        getServer().getPluginManager().registerEvents(this, this);
+    }
+
+    @Override
+    public void onDisable() {
+
+    }
+
+    @EventHandler
+    public void onCommand(PlayerCommandPreprocessEvent event) {
+        String[] commandArgs = event.getMessage().substring(1).toLowerCase().split("\\s+");
+
+        String generalUsageMsg = "usage: Run (slow|normal|fast|faster|fastest|insane|ludicrous)";
+
+        if ("run".equalsIgnoreCase(commandArgs[0])) {
+            event.setCancelled(true);
+
+            Player player = event.getPlayer();
+
+            if (commandArgs.length == 1 || commandArgs.length > 2) {
+                player.sendMessage(generalUsageMsg);
+                return;
+            }
+
+            String command = commandArgs[1].toLowerCase();
+            if (speeds.containsKey(command)) {
+                Float speed = speeds.get(command);
+                playerSpeedCache.put(player, speed);
+                player.sendMessage("Your speed is set to: " + command + " (" + speed + ")");
+            } else {
+                player.sendMessage(command + " is not a valid speed setting\n" + generalUsageMsg);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onRun(PlayerToggleSprintEvent event) {
+        Player player = event.getPlayer();
+        if (player.isSprinting()) {
+            player.setWalkSpeed(speed_normal);
+        } else {
+            Float playerSpeed = playerSpeedCache.get(player);
+            player.setWalkSpeed(playerSpeed);
+        }
+    }
+
+    @EventHandler
+    public void onCreateBoat(VehicleCreateEvent event) {
+        if (event.getVehicle().getType() == EntityType.BOAT) {
+            Boat boat = (Boat) event.getVehicle();
+            boat.setWorkOnLand(true);
+            boat.setMaxSpeed(speed_fastest);
+        }
+    }
+
+    @EventHandler
+    public void onBoatDestroy(VehicleDestroyEvent event) {
+        if (event.getVehicle().getType() == EntityType.BOAT) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onBowShoot(EntityShootBowEvent event) {
+        double x = event.getProjectile().getVelocity().getX();
+        double y = event.getProjectile().getVelocity().getY();
+        double z = event.getProjectile().getVelocity().getZ();
+
+        getLogger().info("Bow shot velocity is  " + " X:" + x + " Y:" + y + " Z:" +z);
+    }
+
+    @EventHandler
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        Player player = event.getPlayer();
+
+        if (!playerSpeedCache.containsKey(player)) {
+            playerSpeedCache.put(player,speed_fast);
+        }
+
+        getLogger().info(player + " logged in");
+    }
+}
