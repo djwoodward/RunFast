@@ -12,7 +12,8 @@ import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class RunFast extends JavaPlugin implements Listener {
-
+	// Test commit
+	// Another comment for testing commits
 	private final static float speed_slow = 0.03F;
 	private final static float speed_normal = 0.2F;
 	private final static float speed_fast = 0.3F;
